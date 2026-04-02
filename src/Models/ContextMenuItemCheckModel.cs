@@ -33,6 +33,20 @@ namespace ModernContextMenuManager.Models
                 asyncNotifyWhenNotChanged: true);
         }
 
+        internal void SetEnabledSilently(bool value)
+        {
+            if (enabled == value) return;
+            // Registry op may "fail" if another item with the same CLSID
+            // already added/removed the value — still update the field.
+            PackagedComHelper.SetBlockedClsid(ContextMenuItem.Clsid, PackagedComHelper.BlockedClsidType.CurrentUser, !value);
+            enabled = value;
+        }
+
+        internal void NotifyEnabledChanged()
+        {
+            OnPropertyChanged(nameof(Enabled));
+        }
+
         public string DisplayName
         {
             get

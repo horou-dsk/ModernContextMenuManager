@@ -1,15 +1,19 @@
 ﻿using Avalonia.Media.Imaging;
+using ModernContextMenuManager.Base;
 using ModernContextMenuManager.Helpers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ModernContextMenuManager.Models
 {
-    public partial class PackagedAppModel
+    public partial class PackagedAppModel : ObservableObject
     {
+        private bool updatingAllEnabled;
+
         public PackagedAppModel(
             AppInfo appInfo,
             PackageInfo packageInfo,
@@ -25,6 +29,13 @@ namespace ModernContextMenuManager.Models
                 }
                 return new ContextMenuItemCheckModel(c, true, true);
             }).ToArray();
+
+            foreach (var item in ContextMenuItems)
+            {
+                item.PropertyChanged += OnChildEnabledChanged;
+            }
+
+            ToggleAllCommand = new RelayCommand(ToggleAll);
 
             if (string.IsNullOrEmpty(AppInfo.DisplayName))
             {
@@ -43,6 +54,61 @@ namespace ModernContextMenuManager.Models
         public IReadOnlyList<ContextMenuItemCheckModel> ContextMenuItems { get; }
 
         public string DisplayName { get; }
+
+        public RelayCommand ToggleAllCommand { get; }
+
+        public bool? AllEnabled
+        {
+            get
+            {
+                var modifiable = ContextMenuItems.Where(c => c.CanModify).ToArray();
+                if (modifiable.Length == 0) return null;
+
+                bool allEnabled = modifiable.All(c => c.Enabled);
+                bool allDisabled = modifiable.All(c => !c.Enabled);
+
+                if (allEnabled) return true;
+                if (allDisabled) return false;
+                return null;
+            }
+        }
+
+        private void ToggleAll()
+        {
+            var modifiable = ContextMenuItems.Where(c => c.CanModify).ToArray();
+            if (modifiable.Length == 0) return;
+
+            // If not all enabled, enable all; otherwise disable all
+            bool newValue = !modifiable.All(c => c.Enabled);
+
+            updatingAllEnabled = true;
+            try
+            {
+                foreach (var item in modifiable)
+                {
+                    item.SetEnabledSilently(newValue);
+                }
+                foreach (var item in modifiable)
+                {
+                    item.NotifyEnabledChanged();
+                }
+            }
+            finally
+            {
+                updatingAllEnabled = false;
+                OnPropertyChanged(nameof(AllEnabled));
+            }
+        }
+
+        public bool HasModifiableItems => ContextMenuItems.Any(c => c.CanModify);
+
+        private void OnChildEnabledChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ContextMenuItemCheckModel.Enabled) && !updatingAllEnabled)
+            {
+                OnPropertyChanged(nameof(AllEnabled));
+            }
+        }
 
         public Bitmap? Icon
         {

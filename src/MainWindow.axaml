@@ -71,11 +71,12 @@
 					<DataTemplate x:DataType="models:PackagedAppModel">
 						<Expander HorizontalAlignment="Stretch" IsExpanded="True" Margin="0,4" Padding="0" CornerRadius="4">
 							<Expander.Header>
-								<Grid ColumnDefinitions="Auto,*" MinHeight="60">
+								<Grid ColumnDefinitions="Auto,*,Auto" MinHeight="60">
 									<Border ClipToBounds="True" Width="32" Height="32" Margin="0,0,12,0" CornerRadius="4" Background="{DynamicResource AppListIconBackgroundBrush}" VerticalAlignment="Center">
 										<Image Source="{Binding Icon}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform" />
 									</Border>
 									<TextBlock Text="{Binding DisplayName}" FontSize="14" LineHeight="22" Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,4" />
+									<CheckBox Grid.Column="2" IsChecked="{Binding AllEnabled, Mode=OneWay}" IsThreeState="True" Command="{Binding ToggleAllCommand}" IsVisible="{Binding HasModifiableItems}" VerticalAlignment="Center" Margin="8,0,0,0" Content="All" />
 								</Grid>
 							</Expander.Header>
 							<ItemsControl ItemsSource="{Binding ContextMenuItems}" Margin="60,8,12,8">
