@@ -12,16 +12,25 @@ namespace ModernContextMenuManager.Models
     {
         private bool enabled;
 
-        public ContextMenuItemCheckModel(ContextMenuItem contextMenuItem, bool enabled, bool canModify)
+        public ContextMenuItemCheckModel(ContextMenuItem contextMenuItem, bool enabled, bool canModify, string packageFullName)
         {
             ContextMenuItem = contextMenuItem;
             CanModify = canModify;
             this.enabled = enabled;
+            var clsidStr = contextMenuItem.Clsid.ToString("B").ToUpperInvariant();
+            var verb = !string.IsNullOrEmpty(contextMenuItem.Id) ? contextMenuItem.Id : clsidStr;
+            var type = !string.IsNullOrEmpty(contextMenuItem.Type) ? contextMenuItem.Type : "*";
+            VirtualRegistryPath = $@"HKEY_CLASSES_ROOT\{type}\shell\{verb}\ExplorerCommandHandler";
+            PhysicalRegistryPath = $@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\PackagedCom\Package\{packageFullName}\Class\{clsidStr}";
         }
 
         public ContextMenuItem ContextMenuItem { get; }
 
         public bool CanModify { get; }
+
+        public string VirtualRegistryPath { get; }
+
+        public string PhysicalRegistryPath { get; }
 
         public bool Enabled
         {

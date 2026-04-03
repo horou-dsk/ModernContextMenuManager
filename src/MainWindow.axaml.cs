@@ -43,6 +43,18 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void CopyRegistryPath_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (sender is Button button && button.Tag is string registryPath)
+        {
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard != null)
+            {
+                await clipboard.SetTextAsync(registryPath);
+            }
+        }
+    }
+
     private void MainWindow_Closed(object? sender, System.EventArgs e)
     {
         PackagedComHelper.DeleteMCMMFolder();

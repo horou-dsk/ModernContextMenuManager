@@ -25,9 +25,9 @@ namespace ModernContextMenuManager.Models
             {
                 if (blockedClsids.TryGetValue(c.Clsid, out var blockedClsidType))
                 {
-                    return new ContextMenuItemCheckModel(c, false, blockedClsidType != PackagedComHelper.BlockedClsidType.LocalMachine);
+                    return new ContextMenuItemCheckModel(c, false, blockedClsidType != PackagedComHelper.BlockedClsidType.LocalMachine, packageInfo.PackageFullName);
                 }
-                return new ContextMenuItemCheckModel(c, true, true);
+                return new ContextMenuItemCheckModel(c, true, true, packageInfo.PackageFullName);
             }).ToArray();
 
             foreach (var item in ContextMenuItems)
